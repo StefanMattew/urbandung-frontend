@@ -174,8 +174,7 @@ export default function CafeDetail() {
         </div>
       )}
 
-      <div className="w-full h-[350px] bg-black relative overflow-hidden">
-        <img src={cafe.imageUrl || '/placeholder-cafe.jpg'} alt={cafe.name} className="w-full h-full object-cover opacity-50" />
+    <div className="w-full h-[250px] md:h-[350px] bg-black relative overflow-hidden">        <img src={cafe.imageUrl || '/placeholder-cafe.jpg'} alt={cafe.name} className="w-full h-full object-cover opacity-50" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-black/50 flex items-end p-10">
           <div className="max-w-6xl mx-auto w-full relative z-10 pb-8 flex justify-between items-end">
             <div>
@@ -243,12 +242,12 @@ export default function CafeDetail() {
             
             {allPhotos.length > 0 ? (
               <>
-                {/* --- 📱 TAMPILAN HP (Bisa di-swipe horizontal) --- */}
-                <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-6 px-6 scrollbar-hide">
+                <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-3 pb-2 pt-2 scrollbar-hide">
                   {allPhotos.map((photo: string, idx: number) => (
                     <div 
                       key={idx} 
-                      className="min-w-[85%] h-64 rounded-2xl overflow-hidden cursor-pointer relative snap-center shrink-0 shadow-md"
+                      /* aspect-[4/3] membuat foto proporsional seperti foto normal, bukan memaksanya jadi kotak */
+                      className="w-[85%] shrink-0 aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer relative snap-center shadow-md"
                       onClick={() => setCurrentImageIndex(idx)}
                     >
                       <img src={photo} alt={`Suasana ${idx + 1}`} className="w-full h-full object-cover active:scale-95 transition-transform" />
@@ -261,11 +260,11 @@ export default function CafeDetail() {
 
                 {/* --- Indikator Titik (HP) --- */}
                 {allPhotos.length > 1 && (
-                  <div className="flex md:hidden justify-center gap-1.5 mt-2 z-20 pointer-events-none">
+                  <div className="flex md:hidden justify-center gap-1.5 mt-3 mb-2 z-20 pointer-events-none">
                     {allPhotos.map((_, idx) => (
                       <div 
                         key={idx} 
-                        className={`h-1.5 rounded-full transition-all duration-300 ${allPhotos.length > 1 && (currentImageIndex === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100')}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${activeImg === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100'}`}
                       ></div>
                     ))}
                   </div>
