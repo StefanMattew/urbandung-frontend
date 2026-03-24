@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import dynamic from 'next/dynamic'; 
+
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -13,10 +13,7 @@ const areaOptions = [
   '☀️ Outdoor (Terbuka)'
 ];
 
-const CafeMapDetail = dynamic(() => import('@/components/CafeMapDetail'), { 
-  ssr: false, 
-  loading: () => <div className="h-[300px] w-full bg-stone-100 animate-pulse rounded-2xl flex items-center justify-center font-black text-stone-300 tracking-widest uppercase text-xs">Memuat Rute... 🗺️</div> 
-});
+
 
 export default function CafeDetail() {
   const params = useParams();
@@ -268,7 +265,7 @@ export default function CafeDetail() {
                     {allPhotos.map((_, idx) => (
                       <div 
                         key={idx} 
-                        className={`h-1.5 rounded-full transition-all duration-300 ${allPhotos.length > 1 && (activeImg === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100')}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${allPhotos.length > 1 && (currentImageIndex === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100')}`}
                       ></div>
                     ))}
                   </div>
