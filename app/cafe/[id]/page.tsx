@@ -161,7 +161,8 @@ export default function CafeDetail() {
   const regularFacs = parsedFacs.filter((f: string) => !areaOptions.includes(f));
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-20 pt-[70px] md:pt-[80px] font-sans relative">      
+    <div className="min-h-screen bg-[#F8F9FA] pb-20 font-sans relative">
+      
 
       {currentImageIndex !== null && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in" onClick={() => setCurrentImageIndex(null)}>
@@ -173,9 +174,10 @@ export default function CafeDetail() {
         </div>
       )}
 
-    <div className="w-full h-[250px] md:h-[350px] bg-black relative overflow-hidden">        <img src={cafe.imageUrl || '/placeholder-cafe.jpg'} alt={cafe.name} className="w-full h-full object-cover opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-black/50 flex items-end p-10">
-          <div className="max-w-6xl mx-auto w-full relative z-10 pb-8 flex justify-between items-end">
+    <div className="w-full h-[400px] md:h-[450px] bg-black relative overflow-hidden">
+        <img src={cafe.imageUrl || '/placeholder-cafe.jpg'} alt={cafe.name} className="w-full h-full object-cover opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-black/60 to-transparent flex items-end p-5 pb-12 md:p-10">
+          <div className="max-w-6xl mx-auto w-full relative z-10 md:pb-8 flex justify-between items-end">
             <div>
               <Link href="/" className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold mb-6 hover:bg-white hover:text-black transition-all uppercase tracking-widest inline-block">← Kembali Ke Eksplor</Link>
               <h1 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none mb-4">{cafe.name}</h1>
