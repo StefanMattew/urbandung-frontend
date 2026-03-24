@@ -16,7 +16,7 @@ export default function LoginPage() {
     const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
     
     try {
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

@@ -28,9 +28,9 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchData = () => {
-    fetch('http://localhost:5000/api/admin/users').then(res => res.json()).then(setUsers);
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`).then(res => res.json()).then(setUsers);
     
-    fetch('http://localhost:5000/api/admin/cafes')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cafes`)
       .then(res => res.json())
       .then(data => {
         setCafes(data);
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   const handleUpdateScore = async (cafeId: number) => {
     const newScore = scores[cafeId];
     try {
-      const res = await fetch(`http://localhost:5000/api/cafes/${cafeId}/score`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${cafeId}/score`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ popularityScore: newScore })
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
   const handleDeleteCafe = async (id: number, name: string) => {
     if (!window.confirm(`⚠️ HAPUS PAKSA kafe "${name}"? Tindakan Admin tidak bisa dibatalkan.`)) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/cafes/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${id}`, { method: 'DELETE' });
       if (res.ok) { alert('🗑️ Kafe berhasil diberantas!'); fetchData(); }
     } catch (err) { alert('Gagal menghapus kafe.'); }
   };
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`Serahkan hak milik kafe ini ke User #${newOwnerId}?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/cafes/${cafeId}/transfer`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cafes/${cafeId}/transfer`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newOwnerId })
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`Ubah role pengguna ini menjadi ${newRole}?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole })
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`⚠️ PERINGATAN! Hapus permanen akun "${name}"? Tindakan ini tidak bisa dibatalkan.`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, { method: 'DELETE' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
       if (res.ok) {
         alert('🗑️ Akun berhasil dihapus dari sistem!');
         fetchData();

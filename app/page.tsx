@@ -43,7 +43,7 @@ export default function ExplorePage() {
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
       setUserId(parsedUser.id);
-      fetch(`http://localhost:5000/api/users/${parsedUser.id}/favorites`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${parsedUser.id}/favorites`)
         .then(res => res.json())
         .then(data => { if (!data.error) setFavorites(data.map((c: any) => c.id)); })
         .catch(err => console.error(err));
@@ -52,7 +52,7 @@ export default function ExplorePage() {
 
   useEffect(() => {
     setLoading(true);
-    let url = `http://localhost:5000/api/cafes?lat=${userLoc.lat}&lng=${userLoc.lng}&radius=${radius}`;
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/cafes?lat=${userLoc.lat}&lng=${userLoc.lng}&radius=${radius}`;
     if (activePurpose !== 'Semua') url += `&purpose=${encodeURIComponent(activePurpose)}`;
     if (is24Hours) url += `&is24Hours=true`;
 
@@ -70,7 +70,7 @@ export default function ExplorePage() {
     setFavorites(isFav ? favorites.filter(id => id !== cafeId) : [...favorites, cafeId]);
 
     try {
-      await fetch(`http://localhost:5000/api/users/${userId}/favorites`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/favorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cafeId })

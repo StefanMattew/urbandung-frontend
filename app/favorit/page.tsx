@@ -28,7 +28,7 @@ export default function FavoritPage() {
   const loadFavoritesFromDB = async (uId: number) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${uId}/favorites`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${uId}/favorites`);
       const data = await res.json();
       if (!data.error) setFavoriteCafes(data);
     } catch (error) {
@@ -52,8 +52,7 @@ export default function FavoritPage() {
     if (!userId) return;
     setFavoriteCafes(prev => prev.filter(cafe => cafe.id !== cafeId));
     try {
-      await fetch(`http://localhost:5000/api/users/${userId}/favorites`, {
-        method: 'POST',
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/favorites`, {        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cafeId })
       });

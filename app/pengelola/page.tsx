@@ -101,7 +101,7 @@ export default function PengelolaDashboard() {
   }, [router]);
 
   const fetchMyCafes = (ownerId: number) => {
-    fetch(`http://localhost:5000/api/owner/cafes/${ownerId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/owner/cafes/${ownerId}`)
       .then(res => res.json())
       .then(data => setMyCafes(data));
   };
@@ -113,7 +113,7 @@ export default function PengelolaDashboard() {
     
     try {
       // Mengirim data ke backend (Menggunakan PATCH untuk update 1 field saja)
-      const res = await fetch(`http://localhost:5000/api/cafes/${cafeId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${cafeId}`, {
         method: 'PATCH', // Asumsi backend mendukung PATCH, jika tidak ubah ke PUT dan kirim full data
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ crowdStatus: status })
@@ -219,7 +219,7 @@ export default function PengelolaDashboard() {
   const handleDeleteClick = async (cafeId: number, cafeName: string) => {
     if (!confirm(`Hapus kafe "${cafeName}"?`)) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/cafes/${cafeId}`, { method: 'DELETE' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${cafeId}`, { method: 'DELETE' });
       if (res.ok) { alert("Kafe berhasil dihapus!"); fetchMyCafes(user.id); } else alert("Gagal menghapus kafe.");    
     } catch (err) { alert("Terjadi kesalahan."); }
   };
@@ -233,14 +233,14 @@ export default function PengelolaDashboard() {
     try {
       if (imageFile) {
         const uploadData = new FormData(); uploadData.append('file', imageFile);
-        const res = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, { method: 'POST', body: uploadData });
         finalImageUrl = (await res.json()).url;
       }
 
       for (const item of galleryItems) {
         if (item.type === 'file') {
           const uploadData = new FormData(); uploadData.append('file', item.data);
-          const res = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadData });
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, { method: 'POST', body: uploadData });
           finalGalleryUrls.push((await res.json()).url);
         } else { finalGalleryUrls.push(item.data); }
       }
@@ -249,8 +249,8 @@ export default function PengelolaDashboard() {
       const { areaTypes, ...dataToSubmit } = formData;
 
       const method = editingId ? 'PUT' : 'POST';
-      const endpoint = editingId ? `http://localhost:5000/api/cafes/${editingId}` : 'http://localhost:5000/api/cafes';
-      
+      const endpoint = editingId ? `${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${editingId}` : `${process.env.NEXT_PUBLIC_API_URL}/api/cafes`;
+
       const res = await fetch(endpoint, {
         method, headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...dataToSubmit, facilities: combinedFacilities, imageUrl: finalImageUrl, ownerId: user.id, gallery: finalGalleryUrls, menuItems: menus })

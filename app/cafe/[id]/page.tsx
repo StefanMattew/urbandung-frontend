@@ -41,7 +41,7 @@ export default function CafeDetail() {
       });
     }
 
-    fetch(`http://localhost:5000/api/cafes/${params.id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${params.id}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) router.push('/');
@@ -52,7 +52,7 @@ export default function CafeDetail() {
   }, [params.id, router]);
 
   const fetchReviews = () => {
-    fetch(`http://localhost:5000/api/cafes/${params.id}/reviews`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${params.id}/reviews`)
       .then(res => res.json())
       .then(data => {
         setReviews(data);
@@ -67,7 +67,7 @@ export default function CafeDetail() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/cafes/${params.id}/reviews`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cafes/${params.id}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id, rating: newRating, comment: newComment })
