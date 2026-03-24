@@ -1,8 +1,10 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-
+import dynamic from 'next/dynamic'; 
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const areaOptions = [
   '❄️ Indoor AC (Non-Smoking)', 
@@ -10,6 +12,11 @@ const areaOptions = [
   '⛅ Semi-Outdoor (Beratap)', 
   '☀️ Outdoor (Terbuka)'
 ];
+
+const CafeMapDetail = dynamic(() => import('@/components/CafeMapDetail'), { 
+  ssr: false, 
+  loading: () => <div className="h-[300px] w-full bg-stone-100 animate-pulse rounded-2xl flex items-center justify-center font-black text-stone-300 tracking-widest uppercase text-xs">Memuat Rute... 🗺️</div> 
+});
 
 export default function CafeDetail() {
   const params = useParams();
@@ -145,7 +152,7 @@ export default function CafeDetail() {
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black tracking-widest animate-pulse text-gray-400 uppercase">Memuat Ruang...</div>;
   if (!cafe) return null;
 
-  const handleNavigation = () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${cafe.latitude},${cafe.longitude}`, '_blank');
+  const handleNavigation = () => window.open(`https://maps.google.com/?q={cafe.latitude},${cafe.longitude}`, '_blank');
   const statusInfo = checkCafeStatus(cafe);
   
 
@@ -223,7 +230,7 @@ export default function CafeDetail() {
               </div>
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4 border-l-8 border-indigo-600 pl-4">
-                   <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">Cerita Singkat</h2>
+                    <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">Cerita Singkat</h2>
                 </div>
                 <p className="text-gray-600 text-base leading-relaxed font-medium">
                   {cafe.description}
@@ -241,7 +248,7 @@ export default function CafeDetail() {
               <>
                 {/* --- 📱 TAMPILAN HP (Bisa di-swipe horizontal) --- */}
                 <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-6 px-6 scrollbar-hide">
-                  {allPhotos.map((photo, idx) => (
+                  {allPhotos.map((photo: string, idx: number) => (
                     <div 
                       key={idx} 
                       className="min-w-[85%] h-64 rounded-2xl overflow-hidden cursor-pointer relative snap-center shrink-0 shadow-md"
@@ -255,7 +262,19 @@ export default function CafeDetail() {
                   ))}
                 </div>
 
-                {/* --- 💻 TAMPILAN DESKTOP (Grid estetik aslimu) --- */}
+                {/* --- Indikator Titik (HP) --- */}
+                {allPhotos.length > 1 && (
+                  <div className="flex md:hidden justify-center gap-1.5 mt-2 z-20 pointer-events-none">
+                    {allPhotos.map((_, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`h-1.5 rounded-full transition-all duration-300 ${allPhotos.length > 1 && (activeImg === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100')}`}
+                      ></div>
+                    ))}
+                  </div>
+                )}
+
+                {/* --- 💻 TAMPILAN DESKTOP (Grid estetik) --- */}
                 <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 aspect-[2/1]">
                   <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden cursor-pointer relative group" onClick={() => setCurrentImageIndex(0)}>
                     <img src={allPhotos[0]} alt="Main" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -389,7 +408,7 @@ export default function CafeDetail() {
         </div>
 
 
-        <div className="space-y-8">
+        <div className="space-y-8 sticky top-24 h-fit hidden lg:block">
           
           <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
             <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter mb-6">🕒 Jam Operasional</h3>
@@ -427,7 +446,7 @@ export default function CafeDetail() {
           <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 sticky top-24">
             <h3 className="text-xl font-black mb-4 uppercase italic text-gray-950">🗺️ Rute Lokasi</h3>
             <div className="aspect-square rounded-2xl overflow-hidden mb-6 border bg-gray-100 shadow-inner">
-               <iframe className="w-full h-full border-0 pointer-events-none" src={`https://maps.google.com/maps?q=${cafe.latitude},${cafe.longitude}&hl=id&z=15&output=embed`}></iframe>
+               <iframe className="w-full h-full border-0 pointer-events-none" src={`https://maps.google.com/?q=${cafe.latitude},${cafe.longitude}&hl=id&z=15&output=embed`}></iframe>
             </div>
             <button onClick={handleNavigation} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black hover:bg-blue-700 transition-all uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 active:scale-95">
               🚀 MULAI NAVIGASI
@@ -443,6 +462,8 @@ export default function CafeDetail() {
         @keyframes scale-in { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
         .animate-scale-in { animation: scale-in 0.2s ease-out forwards; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
