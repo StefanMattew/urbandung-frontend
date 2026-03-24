@@ -264,7 +264,7 @@ export default function CafeDetail() {
                     {allPhotos.map((_, idx) => (
                       <div 
                         key={idx} 
-                        className={`h-1.5 rounded-full transition-all duration-300 ${activeImg === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100'}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-blue-100'}`}
                       ></div>
                     ))}
                   </div>
