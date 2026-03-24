@@ -232,26 +232,45 @@ export default function CafeDetail() {
             </section>
           )}
           
-          <section className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+          <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="flex items-center gap-3 mb-6 border-l-8 border-blue-600 pl-4">
                <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">📸 Suasana Kafe</h2>
             </div>
             
             {allPhotos.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 aspect-[4/3] md:aspect-[2/1]">
-                <div className="md:col-span-2 md:row-span-2 rounded-2xl overflow-hidden cursor-pointer relative group" onClick={() => setCurrentImageIndex(0)}>
-                  <img src={allPhotos[0]} alt="Main" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+              <>
+                {/* --- 📱 TAMPILAN HP (Bisa di-swipe horizontal) --- */}
+                <div className="flex md:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-6 px-6 scrollbar-hide">
+                  {allPhotos.map((photo, idx) => (
+                    <div 
+                      key={idx} 
+                      className="min-w-[85%] h-64 rounded-2xl overflow-hidden cursor-pointer relative snap-center shrink-0 shadow-md"
+                      onClick={() => setCurrentImageIndex(idx)}
+                    >
+                      <img src={photo} alt={`Suasana ${idx + 1}`} className="w-full h-full object-cover active:scale-95 transition-transform" />
+                      <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest">
+                        {idx + 1} / {allPhotos.length}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                {allPhotos[1] && <div className="rounded-2xl overflow-hidden cursor-pointer relative group hidden md:block" onClick={() => setCurrentImageIndex(1)}><img src={allPhotos[1]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /></div>}
-                {allPhotos[2] && <div className="rounded-2xl overflow-hidden cursor-pointer relative group hidden md:block" onClick={() => setCurrentImageIndex(2)}><img src={allPhotos[2]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /></div>}
-                {allPhotos[3] && (
-                  <div className="rounded-2xl overflow-hidden md:col-span-2 cursor-pointer relative group hidden md:block" onClick={() => setCurrentImageIndex(3)}>
-                    <img src={allPhotos[3]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    {allPhotos.length > 4 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:bg-black/80"><span className="text-white font-black tracking-widest uppercase text-lg">+ {allPhotos.length - 4} Foto</span></div>}
+
+                {/* --- 💻 TAMPILAN DESKTOP (Grid estetik aslimu) --- */}
+                <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 aspect-[2/1]">
+                  <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden cursor-pointer relative group" onClick={() => setCurrentImageIndex(0)}>
+                    <img src={allPhotos[0]} alt="Main" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                   </div>
-                )}
-              </div>
+                  {allPhotos[1] && <div className="rounded-2xl overflow-hidden cursor-pointer relative group" onClick={() => setCurrentImageIndex(1)}><img src={allPhotos[1]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /></div>}
+                  {allPhotos[2] && <div className="rounded-2xl overflow-hidden cursor-pointer relative group" onClick={() => setCurrentImageIndex(2)}><img src={allPhotos[2]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /></div>}
+                  {allPhotos[3] && (
+                    <div className="rounded-2xl overflow-hidden col-span-2 cursor-pointer relative group" onClick={() => setCurrentImageIndex(3)}>
+                      <img src={allPhotos[3]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      {allPhotos.length > 4 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:bg-black/80"><span className="text-white font-black tracking-widest uppercase text-lg">+ {allPhotos.length - 4} Foto</span></div>}
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <div className="aspect-[2/1] bg-gray-50 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-gray-200 text-gray-400">
                 <span className="text-5xl mb-2">📷</span><p className="font-bold uppercase text-xs tracking-widest">Belum ada foto galeri.</p>

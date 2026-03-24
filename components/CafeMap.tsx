@@ -1,5 +1,5 @@
 'use client';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'; 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import Link from 'next/link';
@@ -103,7 +103,11 @@ const createUrbandungIcon = (cafe: any) => {
     popupAnchor: [0, -45] 
   });
 };
-
+function ChangeMapView({ center }: { center: [number, number] }) {
+  const map = useMap();
+  map.setView(center, map.getZoom()); // Memaksa peta pindah
+  return null;
+}
 export default function CafeMap({ cafes, userLoc }: { cafes: any[], userLoc: {lat: number, lng: number} }) {
 
   useEffect(() => {
@@ -115,13 +119,11 @@ export default function CafeMap({ cafes, userLoc }: { cafes: any[], userLoc: {la
     });
   }, []);
 
-
   const centerLat = userLoc?.lat || -6.914744;
   const centerLng = userLoc?.lng || 107.609810;
 
   return (
     <div className="w-full h-[600px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white relative z-0 mt-6 transition-all duration-300">
-      
       <style jsx global>{`
         .urbandung-custom-pin:hover .pin-container {
           transform: translate(-50%, -105%) scale(1.1) !important;
@@ -156,13 +158,14 @@ export default function CafeMap({ cafes, userLoc }: { cafes: any[], userLoc: {la
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
-        {/* Layer Peta Estetik (Voyager dari CartoDB - Gratis & Bersih) */}
+
+        <ChangeMapView center={[centerLat, centerLng]} />
+
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
         />
         
-        {/* --- PIN LOKASI USER (TITIK MERAH BERDENYUT) --- */}
         {userLoc && (
           <Marker position={[userLoc.lat, userLoc.lng]} icon={L.divIcon({
             className: 'user-pin-container',

@@ -1,12 +1,147 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic'; 
+import { useRouter } from 'next/navigation';
 
 const CafeMap = dynamic(() => import('@/components/CafeMap'), { 
   ssr: false, 
   loading: () => <div className="h-[600px] w-full bg-stone-200 animate-pulse rounded-3xl flex items-center justify-center font-black text-stone-400 tracking-widest uppercase">Memuat Satelit... 🛰️</div> 
 });
+
+// --- KOMPONEN KARTU KAFE (DIBUAT TERPISAH AGAR BISA SWIPE) ---
+const CafeCard = ({ cafe, favorites, toggleFavorite, checkCafeStatus, getCrowdBadge, selectedFacilities }: any) => {
+  const isFav = favorites.includes(cafe.id);
+  const statusInfo = checkCafeStatus(cafe);
+  const crowdBadge = getCrowdBadge(cafe.crowdStatus || 'normal'); 
+  const router = useRouter();
+  
+  // Gabungkan Foto Utama dan Galeri
+  const rawGallery = typeof cafe.gallery === 'string' ? JSON.parse(cafe.gallery) : (cafe.gallery || []);
+  const allPhotos = [cafe.imageUrl, ...rawGallery].filter(Boolean);
+  if (allPhotos.length === 0) allPhotos.push('https://via.placeholder.com/600x400');
+
+  const [activeImg, setActiveImg] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Update titik indikator saat di-swipe
+  const handleScroll = (e: any) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.clientWidth;
+    setActiveImg(Math.round(scrollLeft / width));
+  };
+
+  // Tombol geser manual (Desktop)
+  const scrollPrev = (e: any) => {
+    e.preventDefault(); e.stopPropagation();
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -scrollRef.current.clientWidth, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNext = (e: any) => {
+    e.preventDefault(); e.stopPropagation();
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div 
+      onClick={() => router.push(`/cafe/${cafe.id}`)}
+      className="group cursor-pointer bg-white rounded-[2rem] overflow-hidden shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative h-full flex flex-col"
+    >
+      <button 
+        onClick={(e) => toggleFavorite(e, cafe.id)} 
+        className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95"
+      >
+        <span className="text-xl leading-none block mt-[2px]">{isFav ? '❤️' : '🤍'}</span>
+      </button>
+
+      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
+        {cafe.distance !== undefined && (
+          <div className="bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-md">
+            📍 {(cafe.distance / 1000).toFixed(1)} KM
+          </div>
+        )}
+        {cafe.avgRating && parseFloat(cafe.avgRating) > 0 ? (
+          <div className="bg-yellow-400 text-gray-900 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-md flex items-center gap-1 w-fit">
+            ⭐ {parseFloat(cafe.avgRating).toFixed(1)}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="h-[280px] w-full relative bg-stone-100 group/carousel">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        >
+          {allPhotos.map((photo: string, idx: number) => (
+            <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
+              <img src={photo} alt={`${cafe.name} ${idx + 1}`} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>
+          ))}
+        </div>
+
+       
+        {allPhotos.length > 1 && (
+          <>
+            <button onClick={scrollPrev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white backdrop-blur-md rounded-full shadow-md flex items-center justify-center text-gray-900 opacity-0 group-hover/carousel:opacity-100 transition-opacity active:scale-90 z-20 hidden md:flex">
+              ❮
+            </button>
+            <button onClick={scrollNext} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white backdrop-blur-md rounded-full shadow-md flex items-center justify-center text-gray-900 opacity-0 group-hover/carousel:opacity-100 transition-opacity active:scale-90 z-20 hidden md:flex">
+              ❯
+            </button>
+          </>
+        )}
+
+        {allPhotos.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20 pointer-events-none">
+            {allPhotos.map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`h-1.5 rounded-full transition-all duration-300 ${activeImg === idx ? 'w-4 bg-white shadow-sm' : 'w-1.5 bg-white/60'}`}
+              ></div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter italic line-clamp-1 mb-2">{cafe.name}</h2>
+          
+          <div className="flex items-center flex-wrap gap-2 mb-4">
+            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest ${statusInfo.isOpenNow ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {statusInfo.statusText}
+            </span>
+            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest border ${crowdBadge.className}`}>
+              {crowdBadge.label}
+            </span>
+            <span className="text-xs font-bold text-stone-500">{statusInfo.timeText}</span>
+          </div>
+
+          <p className="text-blue-600 font-black text-sm mb-4">{cafe.priceRange}</p>
+          
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {cafe.purpose?.slice(0, 3).map((p: string) => (
+              <span key={p} className="bg-stone-50 text-stone-600 text-[10px] font-bold px-2 py-1.5 rounded-lg uppercase tracking-widest border border-stone-200">{p}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-stone-100">
+          {selectedFacilities.length > 0 && selectedFacilities.map((sf: string) => {
+            const hasFac = (cafe.facilities || []).some((cf:string) => cf.toLowerCase().includes(sf.toLowerCase()));
+            return hasFac ? <span key={sf} className="text-[10px] font-black bg-purple-100 text-purple-700 px-2 py-1 rounded uppercase tracking-widest">{sf}</span> : null;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function ExplorePage() {
   const [cafes, setCafes] = useState([]);
@@ -64,6 +199,7 @@ export default function ExplorePage() {
 
   const toggleFavorite = async (e: any, cafeId: number) => {
     e.preventDefault(); 
+    e.stopPropagation();
     if (!userId) return alert("⚠️ Silakan login terlebih dahulu untuk menyimpan kafe favorit!");
 
     const isFav = favorites.includes(cafeId);
@@ -164,7 +300,6 @@ export default function ExplorePage() {
         <div className="max-w-7xl mx-auto px-6 py-3">
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-            
             <div className="flex bg-stone-200/50 p-1 rounded-xl w-fit border border-stone-200">
               <button 
                 onClick={() => setViewMode('list')} 
@@ -210,7 +345,6 @@ export default function ExplorePage() {
 
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
             <div className="flex flex-wrap items-center gap-3">
-              
               <div className="flex items-center gap-2 bg-white border border-stone-200 px-3 py-1 rounded-lg shadow-sm">
                 <span className="text-[9px] font-bold text-stone-500 uppercase tracking-widest">Jarak:</span>
                 <input type="range" min="1" max="20" value={radius} onChange={(e) => setRadius(parseInt(e.target.value))} className="w-16 md:w-20 accent-blue-600" />
@@ -230,7 +364,6 @@ export default function ExplorePage() {
                   <option value="rating">⭐ Rating Tertinggi</option>
                 </select>
               </div>
-
             </div>
 
             <div className="hidden md:block w-px h-6 bg-stone-300 mx-1"></div>
@@ -245,12 +378,10 @@ export default function ExplorePage() {
               ))}
             </div>
           </div>
-
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-6">
-        
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
             {[1, 2, 3, 4, 5, 6].map(n => <div key={n} className="bg-stone-200 h-[400px] rounded-3xl"></div>)}
@@ -266,81 +397,22 @@ export default function ExplorePage() {
             </p>
           </div>
         ) : viewMode === 'map' ? (
-          
           <div className="animate-fade-in">
              <CafeMap cafes={displayedCafes} userLoc={userLoc} />
           </div>
-
         ) : (
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
-            {displayedCafes.map((cafe: any) => {
-              const isFav = favorites.includes(cafe.id);
-              const statusInfo = checkCafeStatus(cafe);
-              const crowdBadge = getCrowdBadge(cafe.crowdStatus || 'normal'); 
-
-              return (
-                <Link href={`/cafe/${cafe.id}`} key={cafe.id} className="group cursor-pointer">
-                  <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative h-full flex flex-col">
-                    
-                    <button onClick={(e) => toggleFavorite(e, cafe.id)} className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95">
-                      <span className="text-xl leading-none block mt-[2px]">{isFav ? '❤️' : '🤍'}</span>
-                    </button>
-
-                    <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-                      {cafe.distance !== undefined && (
-                        <div className="bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-md">
-                          📍 {(cafe.distance / 1000).toFixed(1)} KM
-                        </div>
-                      )}
-                      {cafe.avgRating && parseFloat(cafe.avgRating) > 0 ? (
-                        <div className="bg-yellow-400 text-gray-900 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-md flex items-center gap-1 w-fit">
-                          ⭐ {parseFloat(cafe.avgRating).toFixed(1)}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="h-[280px] w-full overflow-hidden relative bg-stone-100">
-                      <img src={cafe.imageUrl || 'https://via.placeholder.com/600x400'} alt={cafe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-
-                    <div className="p-6 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter italic line-clamp-1 mb-2">{cafe.name}</h2>
-                        
-                        <div className="flex items-center flex-wrap gap-2 mb-4">
-                          <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest ${statusInfo.isOpenNow ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {statusInfo.statusText}
-                          </span>
-                          
-                          <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest border ${crowdBadge.className}`}>
-                            {crowdBadge.label}
-                          </span>
-
-                          <span className="text-xs font-bold text-stone-500">{statusInfo.timeText}</span>
-                        </div>
-
-                        <p className="text-blue-600 font-black text-sm mb-4">{cafe.priceRange}</p>
-                        
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {cafe.purpose?.slice(0, 3).map((p: string) => (
-                            <span key={p} className="bg-stone-50 text-stone-600 text-[10px] font-bold px-2 py-1.5 rounded-lg uppercase tracking-widest border border-stone-200">{p}</span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-stone-100">
-                        {selectedFacilities.length > 0 && selectedFacilities.map(sf => {
-                          const hasFac = (cafe.facilities || []).some((cf:string) => cf.toLowerCase().includes(sf.toLowerCase()));
-                          return hasFac ? <span key={sf} className="text-[10px] font-black bg-purple-100 text-purple-700 px-2 py-1 rounded uppercase tracking-widest">{sf}</span> : null;
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+            {displayedCafes.map((cafe: any) => (
+              <CafeCard 
+                key={cafe.id} 
+                cafe={cafe} 
+                favorites={favorites} 
+                toggleFavorite={toggleFavorite} 
+                checkCafeStatus={checkCafeStatus} 
+                getCrowdBadge={getCrowdBadge} 
+                selectedFacilities={selectedFacilities} 
+              />
+            ))}
           </div>
         )}
       </div>
@@ -348,6 +420,14 @@ export default function ExplorePage() {
       <style jsx global>{`
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
       `}</style>
     </div>
   );
