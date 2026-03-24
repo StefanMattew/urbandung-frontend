@@ -161,8 +161,7 @@ export default function CafeDetail() {
   const regularFacs = parsedFacs.filter((f: string) => !areaOptions.includes(f));
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-20 font-sans relative">
-      
+    <div className="min-h-screen bg-[#F8F9FA] pb-20 pt-[70px] md:pt-[80px] font-sans relative">      
 
       {currentImageIndex !== null && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in" onClick={() => setCurrentImageIndex(null)}>
