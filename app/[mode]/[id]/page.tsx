@@ -166,6 +166,7 @@ export default function DetailPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black tracking-widest animate-pulse text-gray-400 uppercase">Memuat Ruang...</div>;
   if (!place) return null;
 
+
   const handleNavigation = () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`, '_blank');
   
   const statusInfo = checkStatus(place);
@@ -177,11 +178,15 @@ export default function DetailPage() {
   
   const menusList = safeParse(place.menuItems, []);
   const delivery = safeParse(place.deliveryLinks, { gojek: '', grab: '', shopeeFood: '' });
+  
+
+  const purposes = safeParse(place.purpose, []);
+  const foodCats = safeParse(place.foodCategory, []);
+  const diningTypes = safeParse(place.diningType, []);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-20 font-sans relative">
-      
-      {/* --- LIGHTBOX GALLERY --- */}
+
       {currentImageIndex !== null && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in" onClick={() => setCurrentImageIndex(null)}>
           <button className="absolute top-6 right-6 text-white/50 hover:text-white text-5xl font-black hover:scale-110 transition-all z-50">×</button>
@@ -192,42 +197,55 @@ export default function DetailPage() {
         </div>
       )}
 
-      {/* --- HEADER HERO IMAGE --- */}
-      <div className="w-full h-[400px] md:h-[450px] bg-black relative overflow-hidden">
-        <img src={place.imageUrl || '/placeholder-cafe.jpg'} alt={place.name} className="w-full h-full object-cover opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-black/60 to-transparent flex items-end p-5 pb-12 md:p-10">
-          <div className="max-w-6xl mx-auto w-full relative z-10 md:pb-8 flex justify-between items-end">
+
+      <div className="w-full h-[450px] md:h-[500px] bg-black relative overflow-hidden">
+        <img src={place.imageUrl || '/placeholder-cafe.jpg'} alt={place.name} className="w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-black/80 to-transparent flex items-end p-5 pb-12 md:p-10">
+          <div className="max-w-6xl mx-auto w-full relative z-10 md:pb-8 flex flex-col md:flex-row justify-between md:items-end gap-6">
             <div>
-              <Link href={`/explore?mode=${mode}`} className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold mb-6 hover:bg-white hover:text-black transition-all uppercase tracking-widest inline-block">← Kembali Ke Eksplor</Link>
-              <h1 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none mb-4">{place.name}</h1>
+              <Link href={`/explore?mode=${mode}`} className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] md:text-xs font-bold mb-6 hover:bg-white hover:text-black transition-all uppercase tracking-widest inline-block">← Kembali Ke Eksplor</Link>
               
-              <div className="flex flex-wrap items-center gap-3">
-                <span className={`text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg ${statusInfo.isOpenNow ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+              <h1 className="text-4xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none mb-4">{place.name}</h1>
+              
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4">
+                <span className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg ${statusInfo.isOpenNow ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
                   {statusInfo.statusText}
                 </span>
 
                 {crowdBadge && statusInfo.isOpenNow && (
-                  <span className={`text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg flex items-center gap-2 ${crowdBadge.className}`}>
+                  <span className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg flex items-center gap-2 ${crowdBadge.className}`}>
                     <span className="w-2 h-2 rounded-full bg-white opacity-70 animate-ping"></span> 
                     {crowdBadge.label}
                   </span>
                 )}
 
                 {mode === 'kuliner' && place.isHalal && (
-                   <span className="text-xs font-black bg-green-600 text-white px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg border border-white">✅ HALAL</span>
+                   <span className="text-[10px] md:text-xs font-black bg-green-600 text-white px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg border border-white">✅ HALAL</span>
                 )}
 
-                {userLoc && place.latitude && place.longitude && (
-                  <span className={`text-xs font-black ${themeBg} text-white px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg animate-fade-in`}>
-                    🚗 {calculateDistance(userLoc.lat, userLoc.lng, Number(place.latitude), Number(place.longitude))} KM DARI SINI
-                  </span>
+                {place.priceRange && (
+                   <span className="text-[10px] md:text-xs font-black bg-white text-gray-900 px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg">
+                     💸 {place.priceRange}
+                   </span>
                 )}
                 
-                <span className="text-xs font-black bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-lg uppercase tracking-widest hidden md:inline-block">📍 {place.address}</span>
+                <span className="text-[10px] md:text-xs font-black bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-lg uppercase tracking-widest hidden md:inline-block">📍 {place.address}</span>
               </div>
+
+  
+              {purposes.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {purposes.map((p: string) => (
+                    <span key={p} className="text-[9px] font-black uppercase tracking-widest border border-white/40 text-white px-2 py-1 rounded-md backdrop-blur-sm">
+                      # {p}
+                    </span>
+                  ))}
+                </div>
+              )}
+
             </div>
 
-            <div className="hidden md:flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl shadow-2xl">
+            <div className="hidden md:flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl shadow-2xl shrink-0">
               <span className="text-4xl font-black text-yellow-400 drop-shadow-lg">⭐ {avgRating}</span>
               <span className="text-white text-xs font-bold tracking-widest uppercase mt-1">({reviews.length} Ulasan)</span>
             </div>
@@ -235,26 +253,43 @@ export default function DetailPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-10 mt-[-40px] relative z-20">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 mt-[-40px] relative z-20">
         
-        {/* --- KOLOM KIRI (KONTEN UTAMA) --- */}
+
         <div className="lg:col-span-2 space-y-8">
           
           {place.description && (
-            <section className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
+            <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5"><span className="text-9xl">📖</span></div>
               <div className="relative z-10">
                 <div className={`flex items-center gap-3 mb-4 border-l-8 ${themeBorder} pl-4`}>
-                    <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">Cerita Singkat</h2>
+                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-gray-950">Cerita Singkat</h2>
                 </div>
-                <p className="text-gray-600 text-base leading-relaxed font-medium">{place.description}</p>
+                <p className="text-gray-600 text-sm md:text-base leading-relaxed font-medium">{place.description}</p>
               </div>
+            </section>
+          )}
+
+          {mode === 'kuliner' && (foodCats.length > 0 || diningTypes.length > 0) && (
+            <section className="bg-orange-50 p-6 md:p-8 rounded-3xl shadow-xl border border-orange-100 flex flex-col md:flex-row gap-6">
+               <div className="flex-1">
+                  <h3 className="text-xs font-black text-orange-800 uppercase tracking-[0.2em] mb-3">Kategori Kuliner</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {foodCats.map((cat: string) => <span key={cat} className="bg-white text-orange-600 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm border border-orange-100">{cat}</span>)}
+                  </div>
+               </div>
+               <div className="flex-1">
+                  <h3 className="text-xs font-black text-orange-800 uppercase tracking-[0.2em] mb-3">Tipe Pelayanan</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {diningTypes.map((type: string) => <span key={type} className="bg-white text-orange-600 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm border border-orange-100">{type}</span>)}
+                  </div>
+               </div>
             </section>
           )}
           
           <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
             <div className={`flex items-center gap-3 mb-6 border-l-8 ${themeBorder} pl-4`}>
-               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">📸 Suasana {mode === 'cafe' ? 'Kafe' : 'Tempat Makan'}</h2>
+               <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-gray-950">📸 Suasana {mode === 'cafe' ? 'Kafe' : 'Tempat Makan'}</h2>
             </div>
             
             {allPhotos.length > 0 ? (
@@ -299,12 +334,12 @@ export default function DetailPage() {
           </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <section className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 h-fit">
+            <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 h-fit">
               <h2 className="text-xl font-black mb-6 border-l-8 border-teal-500 pl-4 uppercase text-gray-950">🛋️ Tipe Area</h2>
               {placeAreas.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {placeAreas.map((area: string) => (
-                    <div key={area} className="bg-teal-50 border border-teal-100 text-teal-800 font-bold px-4 py-3 rounded-xl text-sm tracking-wide flex items-center shadow-sm">
+                    <div key={area} className="bg-teal-50 border border-teal-100 text-teal-800 font-bold px-4 py-3 rounded-xl text-xs md:text-sm tracking-wide flex items-center shadow-sm">
                       {area}
                     </div>
                   ))}
@@ -317,7 +352,7 @@ export default function DetailPage() {
               {regularFacs.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {regularFacs.map((f: string) => (
-                    <span key={f} className="bg-purple-50 text-purple-700 font-bold px-4 py-2 rounded-xl text-xs border border-purple-100 uppercase tracking-wider">
+                    <span key={f} className="bg-purple-50 text-purple-700 font-bold px-3 py-2 rounded-xl text-[10px] md:text-xs border border-purple-100 uppercase tracking-wider">
                       ✓ {f}
                     </span>
                   ))}
@@ -327,11 +362,11 @@ export default function DetailPage() {
               )}
             </section>
 
-            <section className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 h-fit">
+            <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 h-fit flex flex-col">
               <div className={`flex justify-between items-center mb-6 border-l-8 ${themeBorder} pl-4`}>
                  <h2 className="text-xl font-black uppercase text-gray-950">🍕 Menu</h2>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 flex-1">
                 {menusList.length > 0 ? menusList.map((menu: any, idx: number) => (
                   <div key={idx} className={`flex justify-between items-center p-4 rounded-xl border ${mode === 'cafe' ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`}>
                     <p className="font-bold text-gray-800 text-sm">{menu.name}</p>
@@ -341,10 +376,25 @@ export default function DetailPage() {
                   <p className="text-gray-400 text-sm font-bold italic">Katalog menu belum ditambahkan.</p>
                 )}
               </div>
+
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Metode Pembayaran</h3>
+                <div className="flex flex-wrap gap-2">
+                  {place.acceptsCash && <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-green-200">💵 Tunai (Cash)</span>}
+                  {place.acceptsCashless && <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200">📱 QRIS / Debit</span>}
+                  {!place.acceptsCash && !place.acceptsCashless && <span className="text-gray-400 text-xs italic">Belum ada info pembayaran</span>}
+                </div>
+                
+                {place.isTaxInc !== undefined && (
+                  <p className="text-[10px] text-gray-400 font-bold mt-4 uppercase tracking-widest bg-gray-50 p-2 rounded-lg text-center">
+                    * Harga di atas <span className={place.isTaxInc ? 'text-green-600' : 'text-red-500'}>{place.isTaxInc ? 'SUDAH' : 'BELUM'} TERMASUK PAJAK</span>
+                  </p>
+                )}
+              </div>
             </section>
           </div>
 
-          {/* --- DELIVERY LINKS MOBILE (MUNUL DI BAWAH KALO HP) --- */}
           {(delivery.gojek || delivery.grab || delivery.shopeeFood) && (
             <section className="bg-white p-6 md:hidden rounded-3xl shadow-xl border border-gray-100">
               <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter mb-4 border-l-8 border-yellow-400 pl-4">🛵 Pesan Antar</h3>
@@ -356,36 +406,36 @@ export default function DetailPage() {
             </section>
           )}
 
-          <section className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+          <section className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100">
             <div className="flex justify-between items-end mb-8 border-l-8 border-yellow-400 pl-4">
                <div>
-                 <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">Review</h2>
-                 <p className="text-gray-500 text-sm font-bold mt-1">Bagaimana pengalaman mereka di sini?</p>
+                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-gray-950">Review</h2>
+                 <p className="text-gray-500 text-xs md:text-sm font-bold mt-1">Bagaimana pengalaman mereka di sini?</p>
                </div>
                <div className="text-right">
                  <span className="text-3xl font-black text-gray-900">{avgRating}</span>
                  <span className="text-yellow-400 text-2xl ml-1">★</span>
-                 <p className="text-xs text-gray-400 font-bold">{reviews.length} Ulasan</p>
+                 <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">{reviews.length} Ulasan</p>
                </div>
             </div>
 
             {currentUser ? (
-              <form onSubmit={handleSubmitReview} className="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-8">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Tulis Ulasanmu Sebagai <span className={themeText}>{currentUser.name}</span></p>
+              <form onSubmit={handleSubmitReview} className="bg-gray-50 p-5 md:p-6 rounded-2xl border border-gray-200 mb-8">
+                <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Tulis Ulasanmu Sebagai <span className={themeText}>{currentUser.name}</span></p>
                 <div className="flex gap-2 mb-4">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button type="button" key={star} onClick={() => setNewRating(star)} className={`text-3xl transition-all hover:scale-125 ${newRating >= star ? 'text-yellow-400 drop-shadow-md' : 'text-gray-300'}`}>★</button>
                   ))}
                 </div>
                 <textarea required placeholder="Ceritakan pengalamanmu di sini..." value={newComment} onChange={e => setNewComment(e.target.value)} className={`w-full bg-white border border-gray-300 rounded-xl p-4 text-sm outline-none focus:ring-2 resize-none h-24 mb-3 ${mode === 'cafe' ? 'focus:border-blue-500 ring-blue-100' : 'focus:border-orange-500 ring-orange-100'}`}></textarea>
-                <button type="submit" disabled={isSubmitting} className="bg-gray-900 text-white font-black px-6 py-3 rounded-xl transition-colors uppercase tracking-widest text-xs disabled:opacity-50 hover:bg-gray-800">
+                <button type="submit" disabled={isSubmitting} className="w-full md:w-auto bg-gray-900 text-white font-black px-6 py-3 rounded-xl transition-colors uppercase tracking-widest text-xs disabled:opacity-50 hover:bg-gray-800 shadow-md">
                   {isSubmitting ? 'Mengirim...' : 'Kirim Ulasan'}
                 </button>
               </form>
             ) : (
               <div className={`${mode === 'cafe' ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'} border p-6 rounded-2xl text-center mb-8`}>
-                <p className={`${mode === 'cafe' ? 'text-blue-800' : 'text-orange-800'} font-bold mb-3`}>Ingin berbagi pengalamanmu di tempat ini?</p>
-                <Link href="/login"><button className={`${themeBg} text-white font-black px-6 py-2 rounded-xl text-xs uppercase tracking-widest hover:opacity-90`}>Login untuk Mengulas</button></Link>
+                <p className={`${mode === 'cafe' ? 'text-blue-800' : 'text-orange-800'} font-bold mb-3 text-sm`}>Ingin berbagi pengalamanmu di tempat ini?</p>
+                <Link href="/login"><button className={`${themeBg} text-white font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-widest hover:opacity-90 shadow-md`}>Login untuk Mengulas</button></Link>
               </div>
             )}
 
@@ -408,7 +458,8 @@ export default function DetailPage() {
                       {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed pl-13 mt-2 bg-gray-50 p-3 rounded-tr-2xl rounded-b-2xl rounded-tl-sm border border-gray-100 inline-block">
+
+                  <p className="text-gray-600 text-sm leading-relaxed ml-13 mt-2 bg-gray-50 p-3.5 rounded-tr-2xl rounded-b-2xl rounded-tl-sm border border-gray-100 inline-block">
                     "{rev.comment}"
                   </p>
                 </div>
@@ -421,7 +472,6 @@ export default function DetailPage() {
         </div>
 
 
-        {/* --- KOLOM KANAN (SIDEBAR) --- */}
         <div className="space-y-8 sticky top-24 h-fit hidden lg:block">
           
           {(delivery.gojek || delivery.grab || delivery.shopeeFood) && (
@@ -471,7 +521,7 @@ export default function DetailPage() {
           <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
             <h3 className="text-xl font-black mb-4 uppercase italic text-gray-950">🗺️ Rute Lokasi</h3>
             <div className="aspect-square rounded-2xl overflow-hidden mb-6 border bg-gray-100 shadow-inner">
-               <iframe className="w-full h-full border-0 pointer-events-none" src={`https://www.google.com/maps?q=$${place.latitude},${place.longitude}&hl=id&z=15&output=embed`}></iframe>
+               <iframe className="w-full h-full border-0 pointer-events-none" src={`https://maps.google.com/maps?q=${place.latitude},${place.longitude}&hl=id&z=15&output=embed`}></iframe>
             </div>
             <button onClick={handleNavigation} className={`w-full ${themeBg} text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 active:scale-95 hover:opacity-90`}>
               🚀 MULAI NAVIGASI

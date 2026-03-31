@@ -12,9 +12,10 @@ const foodCategories = ['Aneka Nasi', 'Aneka Mie & Bakso', 'Sunda / Nusantara', 
 const diningTypes = ['Dine-in', 'Takeaway', 'Drive-thru', 'Lesehan'];
 
 const areaOptions = ['❄️ Indoor AC (Non-Smoking)', '🚬 Indoor AC (Smoking)', '⛅ Semi-Outdoor (Beratap)', '☀️ Outdoor (Terbuka)'];
+
+// OPSI PEMBAYARAN SUDAH DIHAPUS DARI SINI
 const commonFacilities = [
-  'WiFi Ngebut', 'Colokan Banyak', 'Mushola', 'Toilet Bersih', 'Parkir Luas', 'Sofa Nyaman', 'Live Music', 'Pet Friendly', 'VIP Room', 'High Chair',
-  'Cashless Only', 'Cash Only', 'Cashless dan Cash', 'Menu Vegetarian'
+  'WiFi Ngebut', 'Colokan Banyak', 'Mushola', 'Toilet Bersih', 'Parkir Luas', 'Sofa Nyaman', 'Live Music', 'Pet Friendly', 'VIP Room', 'High Chair', 'Menu Vegetarian'
 ];
 
 function SortablePhoto({ id, item, onRemove }: { id: string, item: any, onRemove: () => void }) {
@@ -52,7 +53,10 @@ export default function PengelolaDashboard() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
-    name: '', description: '', address: '', latitude: '', longitude: '', priceRange: '', imageUrl: '', isTaxInc: false, 
+    name: '', description: '', address: '', latitude: '', longitude: '', priceRange: '', imageUrl: '', 
+    isTaxInc: false, 
+    acceptsCash: true, // STATE BARU UNTUK PEMBAYARAN
+    acceptsCashless: true, // STATE BARU UNTUK PEMBAYARAN
     purpose: [] as string[], areaTypes: [] as string[], facilities: [] as string[], viewType: 'City', is24Hours: false,
     operationalHours: JSON.parse(JSON.stringify(defaultHours)),
     isHalal: true, foodCategory: [] as string[], diningType: [] as string[],
@@ -130,7 +134,8 @@ export default function PengelolaDashboard() {
   const resetForm = () => {
     setFormData({ 
       name: '', description: '', address: '', latitude: '', longitude: '', priceRange: '', imageUrl: '', 
-      is24Hours: false, operationalHours: JSON.parse(JSON.stringify(defaultHours)), isTaxInc: false, purpose: [], 
+      isTaxInc: false, acceptsCash: true, acceptsCashless: true,
+      is24Hours: false, operationalHours: JSON.parse(JSON.stringify(defaultHours)), purpose: [], 
       viewType: 'City', areaTypes: [], facilities: [], isHalal: true, foodCategory: [], diningType: [],
       deliveryLinks: { gojek: '', grab: '', shopeeFood: '' }
     });
@@ -155,11 +160,15 @@ export default function PengelolaDashboard() {
 
     setFormData({
       name: item.name, description: item.description || '', address: item.address, latitude: item.latitude.toString(), longitude: item.longitude.toString(),
-      priceRange: item.priceRange, imageUrl: item.imageUrl || '', isTaxInc: item.isTaxInc || false, purpose: parsedPurpose, viewType: item.viewType || 'City',
+      priceRange: item.priceRange, imageUrl: item.imageUrl || '', 
+      isTaxInc: item.isTaxInc || false, 
+      acceptsCash: item.acceptsCash !== undefined ? item.acceptsCash : true,
+      acceptsCashless: item.acceptsCashless !== undefined ? item.acceptsCashless : true,
+      purpose: parsedPurpose, viewType: item.viewType || 'City',
       areaTypes: loadedAreas, facilities: regularFacs, is24Hours: item.is24Hours, operationalHours: loadedHours,
       isHalal: item.isHalal ?? true, foodCategory: parsedFoodCat, diningType: parsedDiningType, deliveryLinks: parsedDelivery
     });
-    setMapLinkInput(`https://maps.google.com/?q=${item.latitude},${item.longitude}`);
+    setMapLinkInput(`https://maps.google.com/?q=$${item.latitude},${item.longitude}`);
     setGalleryItems((item.gallery || []).map((url: string) => ({ id: url, type: 'link', data: url })));
     setMenuList(item.menuItems || []); setEditingId(item.id); setIsAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -358,7 +367,7 @@ export default function PengelolaDashboard() {
                    </div>
                 </div>
                 <div>
-                   <p className="text-[11px] font-black text-purple-400 mb-4 uppercase tracking-[0.2em]">Fasilitas Ekstra & Pembayaran</p>
+                   <p className="text-[11px] font-black text-purple-400 mb-4 uppercase tracking-[0.2em]">Fasilitas Ekstra</p>
                    <div className="flex flex-wrap gap-2 mb-6">
                      {commonFacilities.map(fac => (
                        <button key={fac} type="button" onClick={() => toggleArrayItem('facilities', fac)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.facilities.includes(fac) ? 'bg-purple-600 text-white border-purple-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}>{fac}</button>
@@ -371,12 +380,30 @@ export default function PengelolaDashboard() {
                 </div>
               </section>
 
+              {/* BAGIAN DAFTAR MENU & METODE PEMBAYARAN */}
               <section className="bg-red-50/50 p-6 md:p-10 rounded-[2.5rem] border border-red-100">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black border-l-8 border-red-500 pl-4 uppercase tracking-tight text-gray-900">📝 Daftar Menu </h3>
-                  <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-red-200">
-                    <input type="checkbox" className="w-5 h-5 accent-red-600 cursor-pointer" checked={formData.isTaxInc} onChange={e => setFormData({...formData, isTaxInc: e.target.checked})} />
-                    <label className="text-xs font-black uppercase text-red-800 tracking-widest cursor-pointer">Harga Termasuk Pajak</label>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-red-100 pb-6">
+                  <h3 className="text-xl font-black border-l-8 border-red-500 pl-4 uppercase tracking-tight text-gray-900">📝 Daftar Menu & Pembayaran</h3>
+                  
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Checkbox Cash / Cashless */}
+                    <div className="flex items-center gap-4 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-gray-200">
+                      <span className="text-[10px] font-black uppercase text-gray-400">Terima:</span>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" className="w-4 h-4 accent-green-600" checked={formData.acceptsCash} onChange={e => setFormData({...formData, acceptsCash: e.target.checked})} />
+                        <span className="text-xs font-bold text-gray-700">Cash</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" className="w-4 h-4 accent-blue-600" checked={formData.acceptsCashless} onChange={e => setFormData({...formData, acceptsCashless: e.target.checked})} />
+                        <span className="text-xs font-bold text-gray-700">Cashless (QRIS)</span>
+                      </label>
+                    </div>
+
+                    {/* Checkbox Pajak */}
+                    <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-red-200">
+                      <input type="checkbox" className="w-5 h-5 accent-red-600 cursor-pointer" checked={formData.isTaxInc} onChange={e => setFormData({...formData, isTaxInc: e.target.checked})} />
+                      <label className="text-xs font-black uppercase text-red-800 tracking-widest cursor-pointer">Harga Termasuk Pajak</label>
+                    </div>
                   </div>
                 </div>
 
