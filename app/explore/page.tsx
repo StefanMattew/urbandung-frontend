@@ -1,16 +1,16 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// Load Peta secara dinamis agar tidak error di server-side rendering
+
 const CafeMap = dynamic(() => import('@/components/CafeMap'), { 
   ssr: false, 
   loading: () => <div className="h-[600px] w-full bg-stone-200 animate-pulse rounded-3xl flex items-center justify-center font-black text-stone-400 tracking-widest uppercase">Memuat Satelit... 🛰️</div> 
 });
 
-// --- KOMPONEN KARTU SUPER (Sama Persis dengan Halaman Favorit) ---
+
 const PlaceCard = ({ place, mode, favorites, toggleFavorite, checkStatus, getCrowdBadge, selectedFacilities, userLoc, calculateDistance }: any) => {
   const isFav = favorites.includes(place.id);
   const statusInfo = checkStatus(place);
@@ -135,7 +135,7 @@ const PlaceCard = ({ place, mode, favorites, toggleFavorite, checkStatus, getCro
   );
 };
 
-export default function ExplorePage() {
+function ExploreContent() {
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<'cafe' | 'kuliner'>('cafe');
   const [places, setPlaces] = useState<any[]>([]);
@@ -409,5 +409,12 @@ export default function ExplorePage() {
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
+  );
+}
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div className="text-center py-10">Mencari cafe asik di Bandung... ☕</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 }
