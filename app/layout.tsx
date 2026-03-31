@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar"; 
-
+import { Suspense } from 'react';
 export const metadata: Metadata = {
   title: "UrBandung | Eksplor Kafe di Bandung",
   description: "Temukan kafe nyaman sesuai kebutuhan nugasmu.",
@@ -15,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className="bg-[#F8F9FA] text-gray-900 antialiased">
-        <Navbar />
+        <Suspense fallback={<div>Memuat navigasi...</div>}>
+          <Navbar />
+        </Suspense>
         
         <main>{children}</main>
       </body>
