@@ -1,10 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState ,Suspense} from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'USER' });
@@ -160,4 +160,11 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="text-center py-10">Memuat halaman login... 🔐</div>}>
+            <LoginContent />
+        </Suspense>
+    )  
 }
