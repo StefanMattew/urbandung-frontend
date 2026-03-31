@@ -5,7 +5,6 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- DAFTAR OPSI ---
 const cafePurposeOptions = ['Nugas / WFC', 'Nongkrong Santai', 'Estetik / Spot Foto', 'Meeting / Diskusi'];
 const kulinerPurposeOptions = ['Comfort Food', 'Sarapan', 'Makan Siang', 'Makan Malam', 'Kuliner Malam / Begadang', 'Makan Keluarga', 'Date / Romantis', 'Murah Meriah', 'Cepat Saji'];
 
@@ -57,7 +56,7 @@ export default function PengelolaDashboard() {
     purpose: [] as string[], areaTypes: [] as string[], facilities: [] as string[], viewType: 'City', is24Hours: false,
     operationalHours: JSON.parse(JSON.stringify(defaultHours)),
     isHalal: true, foodCategory: [] as string[], diningType: [] as string[],
-    deliveryLinks: { gojek: '', grab: '', shopeeFood: '' } // FORM BARU DELIVERY
+    deliveryLinks: { gojek: '', grab: '', shopeeFood: '' }
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -149,7 +148,6 @@ export default function PengelolaDashboard() {
     let parsedFoodCat = item.foodCategory || []; if (typeof parsedFoodCat === 'string') try { parsedFoodCat = JSON.parse(parsedFoodCat); } catch(e) { parsedFoodCat = []; }
     let parsedDiningType = item.diningType || []; if (typeof parsedDiningType === 'string') try { parsedDiningType = JSON.parse(parsedDiningType); } catch(e) { parsedDiningType = []; }
     
-    // Parsing Delivery Links
     let parsedDelivery = item.deliveryLinks || { gojek: '', grab: '', shopeeFood: '' };
     if (typeof parsedDelivery === 'string') {
       try { parsedDelivery = JSON.parse(parsedDelivery); } catch(e) { parsedDelivery = { gojek: '', grab: '', shopeeFood: '' }; }
@@ -161,7 +159,7 @@ export default function PengelolaDashboard() {
       areaTypes: loadedAreas, facilities: regularFacs, is24Hours: item.is24Hours, operationalHours: loadedHours,
       isHalal: item.isHalal ?? true, foodCategory: parsedFoodCat, diningType: parsedDiningType, deliveryLinks: parsedDelivery
     });
-    setMapLinkInput(`https://www.google.com/maps?q=${item.latitude},${item.longitude}`);
+    setMapLinkInput(`https://maps.google.com/?q=${item.latitude},${item.longitude}`);
     setGalleryItems((item.gallery || []).map((url: string) => ({ id: url, type: 'link', data: url })));
     setMenuList(item.menuItems || []); setEditingId(item.id); setIsAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -194,11 +192,14 @@ export default function PengelolaDashboard() {
       }
       
       const combinedFacilities = [...formData.areaTypes, ...formData.facilities];
-      const { areaTypes, foodCategory, diningType, isHalal, ...baseData } = formData;
+      const { areaTypes, foodCategory, diningType, isHalal, viewType, ...baseData } = formData;
       
       let dataToSubmit: any = { ...baseData, facilities: combinedFacilities, imageUrl: finalImageUrl, ownerId: user.id, gallery: finalGalleryUrls, menuItems: menuList };
+      
       if (activeTab === 'kuliner') {
         dataToSubmit = { ...dataToSubmit, foodCategory, diningType, isHalal };
+      } else {
+        dataToSubmit = { ...dataToSubmit, viewType };
       }
 
       const method = editingId ? 'PUT' : 'POST';
@@ -227,7 +228,6 @@ export default function PengelolaDashboard() {
           </button>
         </header>
 
-        {/* --- TABS KAFE VS KULINER --- */}
         {!isAdding && (
           <div className="flex bg-white p-2 rounded-2xl shadow-sm border border-gray-100 mb-8 max-w-sm mx-auto md:mx-0">
             <button onClick={() => setActiveTab('cafe')} className={`flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === 'cafe' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>☕ Kafe</button>
@@ -257,13 +257,15 @@ export default function PengelolaDashboard() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-gray-400 uppercase tracking-widest">Pemandangan</label>
-                      <select className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 bg-white text-xs font-bold outline-none focus:border-blue-500" value={formData.viewType} onChange={e => setFormData({...formData, viewType: e.target.value})}>
-                        <option value="City">🌆 City View</option><option value="Nature">🍃 Nature View</option><option value="None">🏠 Indoor Only</option>
-                      </select>
-                    </div>
+                  <div className={`grid gap-4 pt-2 ${activeTab === 'cafe' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    {activeTab === 'cafe' && (
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-gray-400 uppercase tracking-widest">Pemandangan</label>
+                        <select className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 bg-white text-xs font-bold outline-none focus:border-blue-500" value={formData.viewType} onChange={e => setFormData({...formData, viewType: e.target.value})}>
+                          <option value="City">🌆 City View</option><option value="Nature">🍃 Nature View</option><option value="None">🏠 Indoor Only</option>
+                        </select>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-[10px] font-black mb-2 text-gray-400 uppercase tracking-widest">Estimasi Harga</label>
                       <input type="text" className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold outline-none focus:border-blue-500" placeholder="Rp 20k - 50k" value={formData.priceRange} onChange={e => setFormData({...formData, priceRange: e.target.value})} />
@@ -280,13 +282,12 @@ export default function PengelolaDashboard() {
                   </div>
                   {formData.latitude && (
                     <div className="flex-1 min-h-[200px] rounded-2xl overflow-hidden border-4 border-white shadow-lg relative mt-2">
-                      <iframe className="w-full h-full absolute inset-0" src={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}&output=embed`} allowFullScreen></iframe>
+                      <iframe className="w-full h-full absolute inset-0" src={`https://maps.google.com/maps?q=${formData.latitude},${formData.longitude}&output=embed`} allowFullScreen></iframe>
                     </div>
                   )}
                 </div>
               </section>
 
-              {/* --- FORM KHUSUS KULINER --- */}
               {activeTab === 'kuliner' && (
                 <section className="bg-orange-50/50 p-6 md:p-10 rounded-[2.5rem] border border-orange-100 animate-fade-in">
                   <div className="flex justify-between items-center mb-6">
@@ -317,7 +318,6 @@ export default function PengelolaDashboard() {
                 </section>
               )}
 
-              {/* --- BAGIAN BARU: LINK PESAN ANTAR (DELIVERY) --- */}
               <section className="bg-yellow-50/50 p-6 md:p-10 rounded-[2.5rem] border border-yellow-100">
                 <h3 className="text-xl font-black border-l-8 border-yellow-500 pl-4 uppercase tracking-tight text-gray-900 mb-8">🛵 Link Pesan Antar (Opsional)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -371,7 +371,6 @@ export default function PengelolaDashboard() {
                 </div>
               </section>
 
-              {/* --- BAGIAN INPUT MENU --- */}
               <section className="bg-red-50/50 p-6 md:p-10 rounded-[2.5rem] border border-red-100">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-black border-l-8 border-red-500 pl-4 uppercase tracking-tight text-gray-900">📝 Daftar Menu </h3>
@@ -470,7 +469,6 @@ export default function PengelolaDashboard() {
           </div>
         )}
 
-        {/* --- DAFTAR LIST (KAFE ATAU KULINER) --- */}
         {!isAdding && currentList.length === 0 && (
           <div className="text-center py-20 bg-white rounded-[2rem] border border-gray-100">
             <span className="text-6xl block mb-4">{activeTab === 'cafe' ? '☕' : '🍲'}</span>
