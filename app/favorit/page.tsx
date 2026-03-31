@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef,Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// --- KOMPONEN KARTU SUPER (Dengan Fitur Swipe Galeri) ---
+
 const PlaceCard = ({ place, mode, removeFavorite, checkStatus, getCrowdBadge, userLoc, calculateDistance }: any) => {
   const statusInfo = checkStatus(place);
   const crowdBadge = getCrowdBadge(place.crowdStatus || 'normal'); 
@@ -127,7 +127,7 @@ const PlaceCard = ({ place, mode, removeFavorite, checkStatus, getCrowdBadge, us
   );
 };
 
-export default function FavoritPage() {
+function FavoritContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<'cafe' | 'kuliner'>('cafe');
@@ -314,4 +314,11 @@ export default function FavoritPage() {
       `}</style>
     </div>
   );
+}
+export default function FavoritPage() {
+    return (
+        <Suspense fallback={<div className="text-center py-10">Memuat favoritmu... ❤️</div>}>
+            <FavoritContent />
+        </Suspense>
+    )
 }
