@@ -43,12 +43,12 @@ const PlaceCard = ({ place, mode, removeFavorite, checkStatus, getCrowdBadge, us
   return (
     <div onClick={() => router.push(`/${mode}/${place.id}`)} className="group cursor-pointer bg-white rounded-[2rem] overflow-hidden shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative h-full flex flex-col">
       
-      {/* Tombol Hapus Favorit */}
+
       <button onClick={(e) => removeFavorite(e, place.id)} className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg hover:scale-110 transition-transform active:scale-95">
         <span className="text-xl leading-none block mt-[2px]">❤️</span>
       </button>
 
-      {/* Badge Atas Kiri */}
+   
       <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
         {userLoc && place.latitude && place.longitude && (
           <div className="bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-md">

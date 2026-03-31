@@ -157,9 +157,10 @@ function ExploreContent() {
     { name: 'Nongkrong Santai', icon: '🛋️' }, { name: 'Estetik / Spot Foto', icon: '📸' }, { name: 'Meeting / Diskusi', icon: '🤝' }
   ];
   const kulinerPurposeOptions = [
-    { name: 'Semua', icon: '✨' }, { name: 'Sarapan', icon: '🍳' }, 
-    { name: 'Makan Siang', icon: '☀️' }, { name: 'Makan Malam', icon: '🌙' }, 
-    { name: 'Kencan / Romantis', icon: '💖' }, { name: 'Ramah Anak Kos', icon: '💰' }
+    { name: 'Semua', icon: '✨' },{name: 'Comfort food', icon: '🍲'}, { name: 'Sarapan', icon: '🍳' }, 
+    { name: 'Makan Siang', icon: '☀️' }, { name: 'Makan Malam', icon: '🌙' }, {name: 'Kuliner Malam/Begadang', icon: '🌃'},
+     {name: 'Makan Keluarga', icon: '👨‍👩‍👧‍👦'} , 
+    { name: 'Date / Romantis', icon: '💖' }, {name: 'Murah Meriah', icon: '💰'}, {name: 'Cepat Saji', icon: '⏱️'}
   ];
 
   const cafeFacilityOptions = ['WiFi Ngebut', 'Colokan Banyak', 'Outdoor', 'Smoking Area'];
@@ -259,7 +260,7 @@ function ExploreContent() {
       return scoreB - scoreA;
     } else if (sortBy === 'populer') return (b.popularityScore || 0) - (a.popularityScore || 0); 
     else if (sortBy === 'rating') return (parseFloat(b.avgRating) || 0) - (parseFloat(a.avgRating) || 0); 
-    else return distA - distB; // Jarak Terdekat
+    else return distA - distB; 
   });
 
   const checkStatus = (place: any) => {
