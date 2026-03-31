@@ -1,13 +1,22 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'USER' });
   const [error, setError] = useState('');
+  const searchParams = useSearchParams();
+  useEffect(() => {
+  if (searchParams.get('mode') === 'register') {
+    setIsRegister(true);
+  } else {
+    setIsRegister(false);
+  }
+}, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,14 +83,65 @@ export default function LoginPage() {
           </div>
 
           {isRegister && (
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Mendaftar Sebagai</label>
-              <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="USER">Mahasiswa / Pengunjung Kafe</option>
-                <option value="OWNER">Pemilik / Pengelola Kafe</option>
-              </select>
-            </div>
+            
+                <div className="mt-6">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 text-center">
+                    Mendaftar Sebagai
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                   
+                    <button
+                    type="button"
+                    onClick={() => setFormData({...formData, role: 'USER'})}
+                    className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center justify-center gap-3 group ${
+                        formData.role === 'USER' 
+                        ? 'border-blue-600 bg-blue-50/50 shadow-xl shadow-blue-100 scale-105' 
+                        : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
+                    }`}
+                    >
+                    <div className={`text-4xl transition-transform duration-500 ${formData.role === 'USER' ? 'scale-110 rotate-[-5deg]' : 'group-hover:scale-110'}`}>
+                        🎒
+                    </div>
+                    <div className="text-center">
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${formData.role === 'USER' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        Penjelajah
+                        </p>
+                        <p className="text-[8px] font-bold opacity-60 leading-tight mt-1">Cari Kafe & Makan</p>
+                    </div>
+                    {formData.role === 'USER' && (
+                        <div className="absolute -top-2 -right-2 bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-lg animate-bounce">
+                        ✓
+                        </div>
+                    )}
+                    </button>
+
+                    {/* --- OPSI OWNER (MITRA) --- */}
+                    <button
+                    type="button"
+                    onClick={() => setFormData({...formData, role: 'OWNER'})}
+                    className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center justify-center gap-3 group ${
+                        formData.role === 'OWNER' 
+                        ? 'border-orange-500 bg-orange-50/50 shadow-xl shadow-orange-100 scale-105' 
+                        : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
+                    }`}
+                    >
+                    <div className={`text-4xl transition-transform duration-500 ${formData.role === 'OWNER' ? 'scale-110 rotate-[5deg]' : 'group-hover:scale-110'}`}>
+                        🏪
+                    </div>
+                    <div className="text-center">
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${formData.role === 'OWNER' ? 'text-orange-600' : 'text-gray-400'}`}>
+                        Mitra Bisnis
+                        </p>
+                        <p className="text-[8px] font-bold opacity-60 leading-tight mt-1">Kelola Tempatmu</p>
+                    </div>
+                    {formData.role === 'OWNER' && (
+                        <div className="absolute -top-2 -right-2 bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-lg animate-bounce">
+                        ✓
+                        </div>
+                    )}
+                    </button>
+                </div>
+                </div>
           )}
 
           <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-colors mt-4">
