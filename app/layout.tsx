@@ -3,8 +3,8 @@ import "./globals.css";
 import Navbar from "../components/Navbar"; 
 import { Suspense } from 'react';
 export const metadata: Metadata = {
-  title: "UrBandung | Eksplor Kafe di Bandung",
-  description: "Temukan kafe nyaman sesuai kebutuhan nugasmu.",
+  title: "UrBandung | Eksplor Bandung",
+  description: "Eksplor berbagai tempat menarik di Bandung.",
 };
 
 export default function RootLayout({

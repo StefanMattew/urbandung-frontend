@@ -47,7 +47,7 @@ export default function Navbar() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 z-50">
                 <Image 
-                    src="/images/Urbandung2.png" 
+                    src="/images/Urbandung4.png" 
                     alt="Urbandung Logo" 
                     width={240}   
                     height={80} 
